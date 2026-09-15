@@ -1,0 +1,29 @@
+name: Build GDExtension (Windows Only)
+on:
+  workflow_dispatch:
+jobs:
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup python and scons
+        shell: bash
+        run: pip install scons
+      - name: Setup godot-cpp
+        shell: bash
+        run: |
+          cd spine-godot/build
+          ./setup-extension.sh 4.7.2-stable false
+      - name: Build GDExtension
+        shell: bash
+        run: |
+          cd spine-godot/build
+          ./build-extension.sh windows
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: spine-godot-windows-dll
+          path: spine-godot/example-v4-extension/bin/windows/*.dll
+          retention-days: 30
