@@ -103,10 +103,19 @@ public:
 		Error error = OK;
 		if (is_resource) {
 #ifdef SPINE_GODOT_EXTENSION
-			return ResourceLoader::get_singleton()->load(path, "", ResourceLoader::CACHE_MODE_REUSE);
+			Ref<Texture2D> tex = ResourceLoader::get_singleton()->load(path, "", ResourceLoader::CACHE_MODE_REUSE);
 #else
-			return ResourceLoader::load(path, "", ResourceFormatLoader::CACHE_MODE_REUSE, &error);
+			Ref<Texture2D> tex = ResourceLoader::load(path, "", ResourceFormatLoader::CACHE_MODE_REUSE, &error);
 #endif
+			if (tex.is_valid()) return tex;
+			// Fallback: .ctex may not exist yet (import race). Load PNG directly from disk.
+			Ref<Image> img;
+			img.instantiate();
+			if (img->load(path) == OK) {
+				tex = ImageTexture::create_from_image(img);
+				if (tex.is_valid()) return tex;
+			}
+			return Ref<Texture2D>();
 		} else {
 			Ref<Image> img;
 			img.instantiate();
@@ -137,17 +146,23 @@ public:
 #endif
 
 	void import_image_resource(const String &path) {
-#if (VERSION_MAJOR > 4 || (VERSION_MAJOR == 4 && VERSION_MINOR >= 5))
 #ifdef TOOLS_ENABLED
 		// Required when importing into editor by e.g. drag & drop. The .png files
 		// of the atlas might not have been imported yet.
 		// See https://github.com/EsotericSoftware/spine-runtimes/issues/2385
 		if (is_importing) {
+#ifdef SPINE_GODOT_EXTENSION
+			// GDExtension: EditorFileSystem::get_singleton() not exposed by godot-cpp.
+			// Use ResourceLoader to trigger load (auto-handles import if needed).
+			ResourceLoader::get_singleton()->load(path);
+#else
+#if (VERSION_MAJOR > 4 || (VERSION_MAJOR == 4 && VERSION_MINOR >= 5))
 			HashMap<StringName, Variant> custom_options;
 			Dictionary generator_parameters;
 			EditorFileSystem::get_singleton()->reimport_append(path, custom_options, "", generator_parameters);
-		}
 #endif
+#endif
+		}
 #endif
 	}
 
