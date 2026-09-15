@@ -8,19 +8,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Setup python and scons
-        shell: bash
-        run: pip install scons
+        uses: ./.github/actions/setup-godot-deps-4
+
       - name: Setup godot-cpp
         shell: bash
         run: |
           cd spine-godot/build
           ./setup-extension.sh 4.7.2-stable false
-      - name: Build GDExtension
+
+      - name: Build GDExtension (Windows editor)
         shell: bash
         run: |
           cd spine-godot/build
-          ./build-extension.sh windows
+          # 不加 api_version, 让 godot-cpp master 自动处理
+          # 加 generate_bindings=yes 让它重新生成 bindings
+          scons platform=windows target=editor generate_bindings=yes
+
       - name: Upload DLL
         uses: actions/upload-artifact@v4
         with:
