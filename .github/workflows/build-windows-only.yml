@@ -22,9 +22,7 @@ jobs:
         shell: bash
         run: |
           cd spine-godot/build
-          # 不加 api_version, 让 godot-cpp master 自动处理
-          # 加 generate_bindings=yes 让它重新生成 bindings
-          scons platform=windows target=editor generate_bindings=yes
+          ./build-extension.sh windows
 
       - name: Upload DLL
         uses: actions/upload-artifact@v4
