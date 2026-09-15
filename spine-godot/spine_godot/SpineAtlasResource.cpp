@@ -135,7 +135,7 @@ public:
 #endif
 
 	void import_image_resource(const String &path) {
-#if VERSION_MAJOR > 4
+#if (VERSION_MAJOR > 4 || (VERSION_MAJOR == 4 && VERSION_MINOR >= 5))
 #ifdef TOOLS_ENABLED
 		// Required when importing into editor by e.g. drag & drop. The .png files
 		// of the atlas might not have been imported yet.
