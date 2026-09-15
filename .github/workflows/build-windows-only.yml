@@ -1,6 +1,10 @@
 name: Build GDExtension (Windows Only)
 on:
   workflow_dispatch:
+  
+env:
+  GODOT_CPP_API_VERSION: "4.7"
+  
 jobs:
   build-windows:
     runs-on: windows-2022
