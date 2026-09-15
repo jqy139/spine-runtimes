@@ -77,6 +77,7 @@ public:
 	}
 
 	static bool fix_path(String &path) {
+		if (path.begins_with("res://")) return true;
 		const String prefix = "res:/";
 		auto i = path.find(prefix);
 		if (i == -1) {
